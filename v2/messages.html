@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messagerie - Conversations</title>
+    <link rel="stylesheet" href="styles/messages.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barre latérale avec les conversations -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button id="new-conversation-btn">Nouvelle Conversation</button>
+            </div>
+
+            <div class="conversation-list">
+                <!-- Exemple de conversation -->
+                <div class="conversation" onclick="selectConversation('1')">
+                    <div class="conversation-avatar">J</div>
+                    <div class="conversation-info">
+                        <p class="conversation-name">John Doe</p>
+                        <p class="conversation-last-message">Dernier message...</p>
+                    </div>
+                </div>
+
+                <!-- Plus de conversations ici -->
+                <div class="conversation" onclick="selectConversation('2')">
+                    <div class="conversation-avatar">A</div>
+                    <div class="conversation-info">
+                        <p class="conversation-name">Alice</p>
+                        <p class="conversation-last-message">À bientôt !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fenêtre de chat -->
+        <div class="chat-window">
+            <div class="chat-header">
+                <h2 id="chat-header-title">Sélectionnez une conversation</h2>
+            </div>
+
+            <div class="messages">
+                <!-- Les messages de la conversation seront ici -->
+            </div>
+
+            <div class="input-container">
+                <input type="text" id="message-input" placeholder="Tapez un message..." />
+                <button id="send-message-btn">Envoyer</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/messages.js"></script>
+</body>
+</html>
