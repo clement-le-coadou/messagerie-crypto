@@ -1,0 +1,11 @@
+{
+    "dependencies": [
+        "fmt",
+        "libpq",
+        "libpqxx",
+        "openssl",
+        "boost-system",
+        "boost-asio",
+        "boost-beast"
+    ]
+}
