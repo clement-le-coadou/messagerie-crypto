@@ -1,0 +1,97 @@
+/* Style général du corps */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* Style pour le titre principal */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 20px;
+}
+
+/* Style des sections de formulaire */
+div {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}
+
+/* Style des titres de section */
+h3 {
+    text-align: center;
+    color: #444;
+}
+
+/* Style des champs de saisie */
+input[type="text"], input[type="password"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* Style pour la zone de texte */
+textarea {
+    height: 100px;
+    resize: none;
+}
+
+/* Style pour les boutons */
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Mise en page pour aligner les éléments au centre */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Marges supplémentaires entre les sections */
+form + div {
+    margin-top: 40px;
+}
+
+/* Ajout d'une bordure et espacement au niveau des formulaires */
+form input[type="text"],
+form input[type="password"],
+form textarea {
+    margin-bottom: 10px;
+}
+
+/* Style pour les alertes ou messages */
+.alert {
+    padding: 15px;
+    margin: 20px 0;
+    background-color: #f44336;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Style des messages de succès */
+.alert-success {
+    background-color: #4CAF50;
+}
