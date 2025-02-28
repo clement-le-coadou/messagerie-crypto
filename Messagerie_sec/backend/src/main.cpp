@@ -1,37 +1,15 @@
-#include "server.h"
-#include "database.h"
 #include <iostream>
-#include <stdexcept>  // Pour la gestion des exceptions standard
-
-// Exception personnalisée, si nécessaire
-class MyException : public std::exception {
-public:
-    const char* what() const noexcept override {
-        return "Une erreur personnalisée est survenue";
-    }
-};
+#include "server.h"
 
 int main() {
     try {
-        // Connexion à la base de données
-        Database db("dbname=secure_messenger user=postgres password=cytech0001 host=localhost port=5432");
-        
-        // Ajouter un utilisateur pour tester
-        db.addUser("Alice", "hashed_password", "public_key_ECC");
-
-        // Démarrer le serveur
+        // Démarrage du serveur sur le port 8080
         Server server(8080);
         server.run();
-    } catch (const std::exception& e) {  // Capture les exceptions standard
-        std::cerr << "Erreur détectée: " << e.what() << std::endl;
-        return 1;  // Retourne une erreur
-    } catch (const MyException& e) {  // Si tu as une exception personnalisée
-        std::cerr << "Erreur personnalisée: " << e.what() << std::endl;
-        return 2;  // Retourne une erreur spécifique
-    } catch (...) {  // Capture toutes les autres exceptions non spécifiées
-        std::cerr << "Erreur inconnue." << std::endl;
-        return 3;  // Retourne une erreur générique
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     }
-    
-    return 0;  // Tout s'est bien passé
+
+    return 0;
 }

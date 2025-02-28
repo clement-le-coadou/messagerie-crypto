@@ -16,7 +16,7 @@ message(STATUS "pqxx Library: ${pqxx_LIBRARIES}")
 
 # Trouver les bibliothèques installées via vcpkg (dans un autre ordre)
 find_package(OpenSSL REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system asio beast)
+find_package(Boost REQUIRED COMPONENTS system asio beast json)
 find_package(PostgreSQL REQUIRED)
 find_package(libpqxx REQUIRED)
 
@@ -46,6 +46,7 @@ target_link_libraries(backend
     Boost::system 
     Boost::asio
     Boost::beast
+    Boost::json
     PostgreSQL::PostgreSQL
     libpqxx::pqxx
 )

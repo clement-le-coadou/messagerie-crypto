@@ -6,6 +6,7 @@
         "openssl",
         "boost-system",
         "boost-asio",
-        "boost-beast"
+        "boost-beast",
+        "boost-json"
     ]
 }
