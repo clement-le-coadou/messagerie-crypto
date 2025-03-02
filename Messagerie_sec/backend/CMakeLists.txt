@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
+
+# Utiliser vcpkg
 set(CMAKE_TOOLCHAIN_FILE "H:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file" FORCE)
 
 # Nom du projet
@@ -13,8 +15,7 @@ message(STATUS "PostgreSQL Include Dir: ${PostgreSQL_INCLUDE_DIRS}")
 message(STATUS "pqxx Include Dir: ${libpqxx_INCLUDE_DIRS}")
 message(STATUS "pqxx Library: ${pqxx_LIBRARIES}")
 
-
-# Trouver les bibliothèques installées via vcpkg (dans un autre ordre)
+# Trouver les bibliothèques installées via vcpkg
 find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system asio beast json)
 find_package(PostgreSQL REQUIRED)
@@ -32,10 +33,11 @@ add_executable(backend
 # Ajouter les répertoires d'inclusion
 target_include_directories(backend PRIVATE 
     include 
-    ${OPENSSL_INCLUDE_DIR}   # OpenSSL en premier
+    ${OPENSSL_INCLUDE_DIR}   
     ${Boost_INCLUDE_DIRS} 
     ${PostgreSQL_INCLUDE_DIRS} 
-    ${libpqxx_INCLUDE_DIRS}  # Ajouter le répertoire d'inclusion de libpqxx
+    ${libpqxx_INCLUDE_DIRS}
+    "H:/vcpkg/installed/x64-windows/include"  # 📌 Ajout des headers vcpkg
 )
 
 # Lier les bibliothèques nécessaires
@@ -50,8 +52,6 @@ target_link_libraries(backend
     PostgreSQL::PostgreSQL
     libpqxx::pqxx
 )
-
-
 
 # Ajout de flags pour éviter des erreurs sous MSVC
 if (MSVC)

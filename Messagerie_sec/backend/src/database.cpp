@@ -55,15 +55,18 @@ bool Database::sendMessage(int sender_id, int receiver_id, const std::string& co
     }
 }
 
-std::vector<Message> Database::getMessages(int user_id) {
+std::vector<Message> Database::getMessages(int user_id, int contact_id) {
     std::vector<Message> messages;
     try {
         pqxx::work txn(conn_);
 
         pqxx::result r = txn.exec_params(
             "SELECT id, sender_id, receiver_id, content, status, timestamp, signature "
-            "FROM messages WHERE receiver_id = $1 ORDER BY timestamp ASC",
-            user_id
+            "FROM messages "
+            "WHERE (sender_id = $1 AND receiver_id = $2) "
+            "   OR (sender_id = $2 AND receiver_id = $1) "
+            "ORDER BY timestamp ASC",
+            user_id, contact_id
         );
 
         for (auto row : r) {
@@ -84,6 +87,7 @@ std::vector<Message> Database::getMessages(int user_id) {
 }
 
 
+
 bool Database::updateMessageStatus(int message_id, const std::string& status) {
     try {
         pqxx::work txn(conn_);
@@ -95,4 +99,48 @@ bool Database::updateMessageStatus(int message_id, const std::string& status) {
         return false;
     }
 }
+
+int Database::getUserId(const std::string& username, const std::string& password_hash) {
+    try {
+        pqxx::work txn(conn_);
+
+        // Vérification de l'utilisateur avec son nom d'utilisateur et son mot de passe hashé
+        pqxx::result r = txn.exec("SELECT id FROM users WHERE username = " + txn.quote(username) + " AND password_hash = " + txn.quote(password_hash));
+
+        // Si un utilisateur est trouvé, on renvoie son id
+        if (!r.empty()) {
+            return r[0]["id"].as<int>();
+        } else {
+            // Si l'utilisateur n'existe pas, on renvoie -1 pour indiquer un échec
+            return -1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error getting user ID: " << e.what() << std::endl;
+        return -1;  // Renvoi de -1 en cas d'erreur
+    }
+}
+
+std::vector<std::pair<int, std::string>> Database::getUserContacts(int user_id) {
+    std::vector<std::pair<int, std::string>> contacts;
+    try {
+        pqxx::work txn(conn_);
+
+        pqxx::result r = txn.exec_params(
+            "SELECT DISTINCT u.id, u.username "
+            "FROM users u "
+            "JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) "
+            "WHERE u.id != $1 AND (m.sender_id = $1 OR m.receiver_id = $1)",
+            user_id
+        );
+
+        for (auto row : r) {
+            contacts.emplace_back(row["id"].as<int>(), row["username"].as<std::string>());
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error retrieving contacts: " << e.what() << std::endl;
+    }
+    return contacts;
+}
+
+
 

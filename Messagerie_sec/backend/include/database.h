@@ -29,11 +29,13 @@ public:
     // Fonction pour envoyer un message
     bool sendMessage(int sender_id, int receiver_id, const std::string& content);
     
-    // Fonction pour obtenir les messages d'un utilisateur
-    std::vector<Message> getMessages(int user_id);
+    std::vector<std::pair<int, std::string>> getUserContacts(int user_id);
+    std::vector<Message> getMessages(int user_id, int contact_id);
+    
 
     bool updateMessageStatus(int message_id, const std::string& status);
-    
+
+    int getUserId(const std::string& username, const std::string& password_hash);
     
 private:
     pqxx::connection conn_;
