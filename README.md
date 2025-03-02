@@ -1,7 +1,9 @@
 # messagerie-crypto
-cmake -S . -B build/
-cmake --build build
-.\build\Debug\backend.exe
+cmake -S . -B build/__
+cmake --build build__
+.\build\Debug\backend.exe__
 
-npm install
-npm start
+npm install__
+npm start__
+set PORT=3001 && npm start  # (Windows)__
+
