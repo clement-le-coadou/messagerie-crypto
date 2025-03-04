@@ -17,13 +17,15 @@ cmake --build build
 
 Cette commande génère le fichier exécutable dans le dossier build/Debug.
 Installation des Dépendances Frontend
-2. Installer les dépendances
+
+### 2. Installer les dépendances
 
 Dans le dossier du frontend, exécutez la commande suivante pour installer toutes les dépendances :
 
 npm install
 
-3. Lancer l'application
+
+### 3. Lancer l'application
 
 Pour démarrer l'application frontend, utilisez la commande suivante :
 
