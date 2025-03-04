@@ -1,5 +1,4 @@
-mkdir my-chat-app
-cd my-chat-app
+
 npm init -y  # Crée un fichier package.json
 npm install electron --save-dev  # Installe Electron
 
