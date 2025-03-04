@@ -11,7 +11,6 @@ Ce guide explique comment compiler et exécuter les différents composants du pr
 ### 1. Compiler le backend
 Pour compiler le backend du projet (exécutable `backend.exe`), utilisez les commandes suivantes :
 
-```sh
 cmake -S . -B build/
 cmake --build build
 
