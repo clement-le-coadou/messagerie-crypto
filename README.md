@@ -1,4 +1,4 @@
-# Messagerie Crypto
+# Messagerie_sec
 
 ## Introduction
 Bienvenue dans le projet **Messagerie Crypto**. Ce projet permet de créer une application de messagerie sécurisée basée sur la cryptographie.  
@@ -9,7 +9,7 @@ Ce guide explique comment compiler et exécuter les différents composants du pr
 ## Installation et Compilation
 
 ### 1. Compiler le backend
-Pour compiler le backend du projet (exécutable `backend.exe`), utilisez les commandes suivantes :
+Pour compiler le backend du projet (exécutable `backend.exe`), utilisez les commandes suivantes dans le dossier backend :
 
 cmake -S . -B build/
 cmake --build build
@@ -19,14 +19,20 @@ Installation des Dépendances Frontend
 
 ### 2. Installer les dépendances
 
-Dans le dossier du frontend, exécutez la commande suivante pour installer toutes les dépendances :
+Dans le dossier du frontend, exécutez la commande suivante pour installer toutes les dépendances:
 
-npm install
+(dossier frontend) : npm install
+
+(dossier backend) : vcpkg install
+
+### 3. Database
+
+Dans le dossier database il y a un fichier sql qui sert à créer la bdd
 
 
-### 3. Lancer l'application
+### 4. Lancer l'application
 
-Pour démarrer l'application frontend, utilisez la commande suivante :
+Pour démarrer l'application frontend, utilisez la commande suivante dans le dossier frontend :
 
 npm start
 
