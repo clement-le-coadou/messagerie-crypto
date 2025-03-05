@@ -22,7 +22,7 @@ Dans le dossier du frontend, exécutez la commande suivante pour installer toute
 
 (dossier frontend) : npm install
 
-(dossier backend) : vcpkg install
+(dossier backend) : vcpkg install (normalement déjà effectué par la commande cmake -S . -B build/)
 
 ### 3. Database
 
