@@ -8,6 +8,11 @@ Ce guide explique comment compiler et exécuter les différents composants du pr
 
 ## Installation et Compilation
 
+### 0. Installer les outils nécessaires
+Installation nécessaire de npm, cmake et vcpkg. pour vcpkg, étant donné que le path est statique dans le cmakelists, soit vous l'installez sur le même chemin (h:vcpkg/) ou alors sur le chemin de votre choix (faire les modifications nécessaires dans le fichier cmakelists.txt attention à ne jamais le push ni à le pull)
+
+une fois l'installation de vcpkg faite
+
 ### 1. Compiler le backend
 Pour compiler le backend du projet (exécutable `backend.exe`), utilisez les commandes suivantes dans le dossier backend :
 
