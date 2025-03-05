@@ -15,7 +15,6 @@ cmake -S . -B build/
 cmake --build build
 
 Cette commande génère le fichier exécutable dans le dossier build/Debug.
-Installation des Dépendances Frontend
 
 ### 2. Installer les dépendances
 
