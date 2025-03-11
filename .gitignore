@@ -1,0 +1,11 @@
+/Messagerie_sec/frontend/node_modules
+/Messagerie_sec/backend/vcpkg_installed
+/Messagerie_sec/backend/build
+v2/package-lock.json
+v2/package.json
+myProject/package.json
+myProject/package-lock.json
+Messagerie_sec/frontend/package.json
+Messagerie_sec/frontend/package-lock.json
+.vscode/PythonImportHelper-v2-Completion.json
+myProject/package-lock.json

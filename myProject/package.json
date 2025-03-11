@@ -16,6 +16,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "electron-store": "^10.0.1",
+    "myproject": "file:",
     "pg": "^8.13.2"
   }
 }

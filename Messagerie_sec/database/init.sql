@@ -14,7 +14,7 @@ CREATE TABLE messages (
     sender_id INT REFERENCES users(id) ON DELETE CASCADE,
     receiver_id INT REFERENCES users(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    signature TEXT NOT NULL,  -- Signature numérique du message
+    signature TEXT NOT NULL DEFAULT '',  -- Signature numérique du message
     status VARCHAR(20) DEFAULT 'sent',  -- Statut du message (sent, delivered, read)
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
