@@ -1,0 +1,189 @@
+/* Importation de la police */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Styles globaux */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Mode sombre */
+body {
+    background-color: #121212;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Conteneur principal */
+.container {
+    display: flex;
+    width: 90%;
+    max-width: 1000px;
+    height: 80vh;
+    background: #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Barre latérale des contacts */
+.sidebar {
+    width: 35%;
+    background: #2a2a2a;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #444;
+}
+
+/* Barre de recherche */
+.sidebar header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar input {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #333;
+    color: white;
+}
+
+.sidebar button {
+    padding: 10px;
+    background: #25D366;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: 0.3s;
+}
+
+.sidebar button:hover {
+    background: #1ebe57;
+}
+
+/* Liste des contacts */
+.contact-list {
+    margin-top: 15px;
+    list-style: none;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.contact-list li {
+    padding: 12px;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.contact-list li:hover {
+    background: #333;
+}
+
+/* Zone principale */
+.main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Liste des demandes */
+.request-list {
+    list-style: none;
+}
+
+.request-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #2a2a2a;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.request-list button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+    transition: 0.3s;
+}
+
+.request-list button:first-child {
+    background: #25D366;
+    color: white;
+}
+
+.request-list button:first-child:hover {
+    background: #1ebe57;
+}
+
+.request-list button:last-child {
+    background: #ff3b30;
+    color: white;
+}
+
+.request-list button:last-child:hover {
+    background: #e02a1b;
+}
+
+
+/* boutton de retour */
+/* Style pour le bouton de retour */
+button {
+    background-color: #4CAF50; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #45a049; /* Changement de couleur au survol */
+}
+
+/* Style pour le lien de retour */
+.back-to-chat {
+    text-decoration: none;
+    color: #4CAF50;
+    font-size: 16px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.back-to-chat:hover {
+    text-decoration: underline;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .main {
+        padding: 15px;
+    }
+}

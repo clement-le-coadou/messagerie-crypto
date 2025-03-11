@@ -161,3 +161,30 @@ body {
     border-color: transparent #ffffff transparent transparent;
 }
 
+/* Style du bouton d'ajout de contact */
+.add-contact-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    margin-top: 20px;
+    background-color:  #128c7e; /* Vert WhatsApp */
+    color: white;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.add-contact-btn:hover {
+    background-color: #25d366; /* Vert foncé */
+    transform: translateY(-3px); /* Effet de survol */
+}
+
+.add-contact-btn:active {
+    background-color: #0d6b61; /* Vert encore plus foncé quand on clique */
+    transform: translateY(1px); /* Effet d'enfoncement */
+}
+

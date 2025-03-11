@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <link rel="stylesheet" href="profil_contact.css">
+</head>
+<body>
+    <header>
+        <h1>Mon Profil</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Informations du Profil</h2>
+            <p>Clé publique : <span id="publicKey">Chargement...</span></p>
+            <button onclick="copyPublicKey()">Copier</button>
+        </section>
+        <section>
+            <h2>Demandes Reçues</h2>
+            <div id="requestsList"></div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

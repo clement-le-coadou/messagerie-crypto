@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messagerie</title>
+    <link rel="stylesheet" href="profil_contact.css">
+    <script defer src="contact.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Barre latérale des contacts -->
+        <aside class="sidebar">
+            <header>
+                <h2>Contacts</h2>
+                <input type="text" id="searchInput" placeholder="Rechercher un contact..." />
+                <button id="addContact">Ajouter un contact</button>
+            </header>
+            <ul id="contact-list" class="contact-list"></ul>
+        </aside>
+
+        <!-- Zone principale avec les demandes de contacts -->
+        <main class="main">
+            <h2>Demandes de contact</h2>
+            <ul id="request-list" class="request-list"></ul>
+        
+            <!-- Bouton de retour vers la page de chat -->
+            <button onclick="window.location.href='chat.html'">Retour au chat</button>
+        </main>
+        
+    </div>
+</body>
+</html>

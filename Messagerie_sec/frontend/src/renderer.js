@@ -53,11 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Réponse du serveur:", data);
             console.log("token",data.data.token);
             console.log('userId',data.data.user_id);
+            console.log("pb",data.data.public_key);
     
             if (data) {
                 localStorage.setItem('jwtToken', data.data.token); // Stocker le JWT
                 localStorage.setItem('username', username); // Stocker le username
                 localStorage.setItem('user_Id',data.data.user_id);
+                localStorage.setItem('public_key',data.data.public_key);
                 alert('Connexion réussie !');
                 window.location.href = "chat.html"; // Rediriger vers la messagerie
             } else {
