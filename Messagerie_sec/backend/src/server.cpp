@@ -25,7 +25,11 @@ void Server::run() {
 void Server::do_accept() {
     acceptor_.async_accept(
         [this](beast::error_code ec, asio::ip::tcp::socket socket) {
-            if (!ec) {
+            try {
+                if (ec) {
+                    throw std::runtime_error("Error: " + ec.message());
+                }
+
                 std::cout << "Client connected: " << socket.remote_endpoint() << std::endl;
 
                 beast::flat_buffer buffer;
@@ -35,8 +39,8 @@ void Server::do_accept() {
                 std::cout << "Received HTTP request:\n" << req << std::endl;
 
                 handle_request(req, socket);
-            } else {
-                std::cerr << "Error: " << ec.message() << std::endl;
+            } catch (const std::exception& e) {
+                std::cerr << "Exception occurred: " << e.what() << std::endl;
             }
             do_accept();
         });
