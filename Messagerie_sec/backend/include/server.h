@@ -22,6 +22,7 @@ public:
 
 private:
     void do_accept();
+    int validate_jwt_token(const std::string& token);
     void handle_request(beast::http::request<beast::http::string_body> req, asio::ip::tcp::socket& socket);
     void handle_websocket(asio::ip::tcp::socket socket);
     void broadcast_message(const std::string& message);

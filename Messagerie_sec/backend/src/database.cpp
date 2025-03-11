@@ -120,19 +120,43 @@ int Database::getUserId(const std::string& username, const std::string& password
     }
 }
 
+// std::vector<std::pair<int, std::string>> Database::getUserContacts(int user_id) {
+//     std::vector<std::pair<int, std::string>> contacts;
+//     try {
+//         pqxx::work txn(conn_);
+
+//         pqxx::result r = txn.exec_params(
+//             "SELECT DISTINCT u.id, u.username "
+//             "FROM users u "
+//             "JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) "
+//             "WHERE u.id != $1 AND (m.sender_id = $1 OR m.receiver_id = $1)",
+//             user_id
+//         );
+
+//         for (auto row : r) {
+//             contacts.emplace_back(row["id"].as<int>(), row["username"].as<std::string>());
+//         }
+//     } catch (const std::exception& e) {
+//         std::cerr << "Error retrieving contacts: " << e.what() << std::endl;
+//     }
+//     return contacts;
+// }
+
 std::vector<std::pair<int, std::string>> Database::getUserContacts(int user_id) {
     std::vector<std::pair<int, std::string>> contacts;
     try {
         pqxx::work txn(conn_);
 
+        // On sélectionne les contacts associés à l'utilisateur à partir de la table contacts
         pqxx::result r = txn.exec_params(
-            "SELECT DISTINCT u.id, u.username "
+            "SELECT u.id, u.username "
             "FROM users u "
-            "JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) "
-            "WHERE u.id != $1 AND (m.sender_id = $1 OR m.receiver_id = $1)",
+            "JOIN contacts c ON u.id = c.contact_id "
+            "WHERE c.user_id = $1",
             user_id
         );
 
+        // On parcourt les résultats pour récupérer les id et noms des contacts
         for (auto row : r) {
             contacts.emplace_back(row["id"].as<int>(), row["username"].as<std::string>());
         }
@@ -141,6 +165,143 @@ std::vector<std::pair<int, std::string>> Database::getUserContacts(int user_id) 
     }
     return contacts;
 }
+
+
+bool Database::sendContactRequest(int user_id, const std::string& public_key) {
+    try {
+        pqxx::work txn(conn_);
+
+        // Vérifier si la requête préparée existe, sinon la créer
+        static bool prepared = false;
+        if (!prepared) {
+            conn_.prepare("find_user_by_key", "SELECT id FROM users WHERE public_key = $1");
+            conn_.prepare("check_request", "SELECT 1 FROM contact_requests WHERE sender_id = $1 AND receiver_id = $2 AND status = 'pending'");
+            conn_.prepare("insert_request", "INSERT INTO contact_requests (sender_id, receiver_id, status) VALUES ($1, $2, 'pending')");
+            prepared = true;
+        }
+
+        // Vérifier si l'utilisateur avec cette clé publique existe
+        pqxx::result result = txn.exec_prepared("find_user_by_key", public_key);
+        if (result.empty()) {
+            return false; // Clé publique non trouvée
+        }
+
+        int contact_id = result[0][0].as<int>();
+
+        // Vérifier si une demande existe déjà
+        pqxx::result check_existing = txn.exec_prepared("check_request", user_id, contact_id);
+        if (!check_existing.empty()) {
+            return false; // Demande déjà envoyée
+        }
+
+        // Insérer la demande de contact
+        txn.exec_prepared("insert_request", user_id, contact_id);
+        txn.commit();
+
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Erreur lors de l'envoi de la demande de contact : " << e.what() << std::endl;
+        return false;
+    }
+}
+
+
+std::string Database::getUserPublicKey(int user_id) {
+    try {
+        pqxx::work txn(conn_);
+
+        // Préparer la requête (si elle n'a pas déjà été préparée)
+        conn_.prepare("get_user_public_key", "SELECT public_key FROM users WHERE id = $1");
+
+        // Exécuter la requête préparée
+        pqxx::result result = txn.exec_prepared("get_user_public_key", user_id);
+
+        if (result.empty()) {
+            return "";
+        }
+
+        return result[0]["public_key"].as<std::string>();
+
+    } catch (const std::exception& e) {
+        std::cerr << "Erreur lors de la récupération de la clé publique : " << e.what() << std::endl;
+        return "";
+    }
+}
+
+std::vector<ContactRequest> Database::getContactRequests(int user_id) {
+    std::vector<ContactRequest> requests;
+    
+    pqxx::work txn(conn_);
+    pqxx::result result = txn.exec("SELECT sender_id, username FROM contact_requests "
+                                   "JOIN users ON contact_requests.sender_id = users.id "
+                                   "WHERE receiver_id = " + txn.quote(user_id) + " AND status = 'pending'");
+
+    for (const auto& row : result) {
+        ContactRequest request;
+        request.id = row["sender_id"].as<int>();
+        request.username = row["username"].as<std::string>();
+        requests.push_back(request);
+    }
+    
+    txn.commit();
+    return requests;
+}
+
+bool Database::acceptContactRequest(int user_id, int contact_id) {
+    try {
+        pqxx::work txn(conn_);
+
+        // Vérifier si la requête préparée existe, sinon la créer
+        static bool prepared = false;
+        if (!prepared) {
+            conn_.prepare("update_request", "UPDATE contact_requests SET status = 'accepted' WHERE receiver_id = $1 AND sender_id = $2 AND status = 'pending'");
+            conn_.prepare("insert_contact", "INSERT INTO contacts (user_id, contact_id) VALUES ($1, $2), ($2, $1)");
+            prepared = true;
+        }
+
+        // Mettre à jour la demande de contact
+        pqxx::result res = txn.exec_prepared("update_request", user_id, contact_id);
+        if (res.affected_rows() == 0) {
+            return false; // Aucune demande en attente
+        }
+
+        // Ajouter les contacts mutuels
+        txn.exec_prepared("insert_contact", user_id, contact_id);
+        txn.commit();  // Assurez-vous que le commit a bien lieu
+
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Erreur lors de l'acceptation du contact : " << e.what() << std::endl;
+        return false;
+    }
+}
+
+
+bool Database::rejectContactRequest(int user_id, int contact_id) {
+    try {
+        pqxx::work txn(conn_);
+
+        // Vérifier si la requête préparée existe, sinon la créer
+        static bool prepared = false;
+        if (!prepared) {
+            conn_.prepare("delete_request", "DELETE FROM contact_requests WHERE receiver_id = $1 AND sender_id = $2 AND status = 'pending'");
+            prepared = true;
+        }
+
+        // Supprimer la demande de contact
+        pqxx::result res = txn.exec_prepared("delete_request", user_id, contact_id);
+        if (res.affected_rows() == 0) {
+            return false; // Aucune demande à rejeter
+        }
+
+        txn.commit();
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Erreur lors du rejet de la demande de contact : " << e.what() << std::endl;
+        return false;
+    }
+}
+
 
 
 

@@ -15,6 +15,12 @@ struct Message {
     std::string signature;
 };
 
+struct ContactRequest {
+    int id;
+    std::string username;
+};
+
+
 
 class Database {
 public:
@@ -36,6 +42,16 @@ public:
     bool updateMessageStatus(int message_id, const std::string& status);
 
     int getUserId(const std::string& username, const std::string& password_hash);
+
+    std::string getUserPublicKey(int user_id);
+
+    bool acceptContactRequest(int user_id, int contact_id);
+
+    bool sendContactRequest(int user_id, const std::string& public_key);
+
+    std::vector<ContactRequest> getContactRequests(int user_id);
+
+    bool rejectContactRequest(int user_id, int contact_id);
     
 private:
     pqxx::connection conn_;
