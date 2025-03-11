@@ -30,6 +30,16 @@ CREATE TABLE contacts (
     CONSTRAINT contact_unique CHECK (user_id != contact_id)  -- Empêche un utilisateur d'être son propre contact
 );
 
+CREATE TABLE contact_requests (
+    sender_id INT,
+    receiver_id INT,
+    status VARCHAR(10), -- 'pending', 'accepted', 'rejected'
+    PRIMARY KEY (sender_id, receiver_id),
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
+);
+
+
 -- Insertion des utilisateurs
 INSERT INTO users (username, password_hash, public_key) VALUES
 ('alice', 'password1', 'public_key_1'),
