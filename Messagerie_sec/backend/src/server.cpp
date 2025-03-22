@@ -111,33 +111,33 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
     }
 
     if (req.method() == http::verb::post) {
-if (req.target() == "/send_message") {
-    std::cout << "-------------------- Envoi de message en cours --------------------" << std::endl;
+        if (req.target() == "/send_message") {
+            std::cout << "-------------------- Envoi de message en cours --------------------" << std::endl;
 
-    if (!parsed_body.as_object().contains("recipient") || !parsed_body.as_object().contains("content") || !parsed_body.as_object().contains("sender_id")) {
-        res.result(http::status::bad_request);
-        res.body() = "Missing sender_id, recipient, or content";
-        send_response(res, socket);
-        return;
-    }
+            if (!parsed_body.as_object().contains("recipient") || !parsed_body.as_object().contains("content") || !parsed_body.as_object().contains("sender_id")) {
+                res.result(http::status::bad_request);
+                res.body() = "Missing sender_id, recipient, or content";
+                send_response(res, socket);
+                return;
+            }
 
-    // Récupérer sender_id directement depuis la requête JSON
-    int sender_id = json::value_to<int>(parsed_body.at("sender_id"));
-    int recipient_id = json::value_to<int>(parsed_body.at("recipient"));
-    std::string content = json::value_to<std::string>(parsed_body.at("content"));
+            // Récupérer sender_id directement depuis la requête JSON
+            int sender_id = json::value_to<int>(parsed_body.at("sender_id"));
+            int recipient_id = json::value_to<int>(parsed_body.at("recipient"));
+            std::string content = json::value_to<std::string>(parsed_body.at("content"));
 
-    if (db_->sendMessage(sender_id, recipient_id, content)) {
-        res.result(http::status::ok);
-        res.body() = "Message sent successfully";
-    } else {
-        res.result(http::status::internal_server_error);
-        res.body() = "Failed to send message";
-    }
+            if (db_->sendMessage(sender_id, recipient_id, content)) {
+                res.result(http::status::ok);
+                res.body() = "Message sent successfully";
+            } else {
+                res.result(http::status::internal_server_error);
+                res.body() = "Failed to send message";
+            }
 
-    send_response(res, socket);
-    std::cout << "-------------------- Fin d'envoi de message --------------------" << std::endl;
-}
-else if (req.target() == "/get_messages") {
+            send_response(res, socket);
+            std::cout << "-------------------- Fin d'envoi de message --------------------" << std::endl;
+        }
+        else if (req.target() == "/get_messages") {
             std::cout << "getMessages appelé" << std::endl;
         
             if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("contact_id")) {
@@ -165,7 +165,8 @@ else if (req.target() == "/get_messages") {
             res.result(http::status::ok);
             res.set(http::field::content_type, "application/json");
             res.body() = json::serialize(json_messages);
-        }else if (req.target() == "/get_contacts") {
+        }
+        else if (req.target() == "/get_contacts") {
             std::cout << "getContacts appelé" << std::endl;
         
             if (!parsed_body.as_object().contains("user_id")) {
@@ -191,7 +192,8 @@ else if (req.target() == "/get_messages") {
             res.result(http::status::ok);
             res.set(http::field::content_type, "application/json");
             res.body() = json::serialize(json_contacts);
-        }else if (req.target() == "/send_contact_request") {
+        }
+        else if (req.target() == "/send_contact_request") {
             std::cout << "Envoi d'une demande de contact..." << std::endl;
         
             if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("public_key")) {
@@ -211,7 +213,8 @@ else if (req.target() == "/get_messages") {
                 res.result(http::status::internal_server_error);
                 res.body() = "Failed to send contact request";
             }
-        }else if (req.target() == "/handle_request") {
+        }
+        else if (req.target() == "/handle_request") {
             std::cout << "Handling contact request..." << std::endl;
             
             if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("request_id") || !parsed_body.as_object().contains("accept")) {
@@ -245,7 +248,8 @@ else if (req.target() == "/get_messages") {
             }
             
             send_response(res, socket);
-        }else if (req.target() == "/get_contact_requests") {
+        }
+        else if (req.target() == "/get_contact_requests") {
             std::cout << "Fetching contact requests..." << std::endl;
         
             // Vérifier la présence de user_id dans la requête JSON
@@ -276,7 +280,8 @@ else if (req.target() == "/get_messages") {
             res.result(http::status::ok);
             res.set(http::field::content_type, "application/json");
             res.body() = json::serialize(json_requests);
-        }else if (req.target() == "/login") {
+        }
+        else if (req.target() == "/login") {
             std::string username = json::value_to<std::string>(parsed_body.at("username"));
             std::string password = json::value_to<std::string>(parsed_body.at("password"));
             int user_id = db_->getUserId(username, password);
@@ -310,7 +315,8 @@ else if (req.target() == "/get_messages") {
                 res.result(http::status::unauthorized);
                 res.body() = "Invalid username or password";
             }
-        } else if (req.target() == "/register") {
+        }
+        else if (req.target() == "/register") {
             std::string username = json::value_to<std::string>(parsed_body.at("username"));
             std::string password = json::value_to<std::string>(parsed_body.at("password"));
             std::string publicKey = json::value_to<std::string>(parsed_body.at("publicKey"));
@@ -322,15 +328,16 @@ else if (req.target() == "/get_messages") {
                 res.result(http::status::internal_server_error);
                 res.body() = "Failed to register user";
             }
-        } else {
+        }
+        else {
             res.result(http::status::not_found);
             res.body() = "Route not found";
         }
-    } else {
+    }
+    else {
         res.result(http::status::method_not_allowed);
         res.body() = "Method not allowed";
     }
-
     send_response(res, socket);
 }
 

@@ -2,10 +2,7 @@ README.md
 Messagerie_sec/backend/CMakeLists.txt
 Messagerie_sec/backend/CMakeUserPresets.json
 Messagerie_sec/backend/build/CMakeCache.txt
-Messagerie_sec/backend/build/vcpkg-manifest-install.log
-Messagerie_sec/backend/build/CMakeFiles/
-Messagerie_sec/backend/build/vcpkg_installed/vcpkg/
-Messagerie_sec/backend/build/vcpkg_installed/x64-windows/
+Messagerie_sec/backend/build/
 Messagerie_sec/backend/CMakeLists.txt
 Messagerie_sec/backend/CMakeUserPresets.json
 Messagerie_sec/backend/CMakeLists.txt
