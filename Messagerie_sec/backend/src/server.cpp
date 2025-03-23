@@ -112,30 +112,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
 
     if (req.method() == http::verb::post) {
         if (req.target() == "/send_message") {
-            std::cout << "-------------------- Envoi de message en cours --------------------" << std::endl;
-
-            if (!parsed_body.as_object().contains("recipient") || !parsed_body.as_object().contains("content") || !parsed_body.as_object().contains("sender_id")) {
-                res.result(http::status::bad_request);
-                res.body() = "Missing sender_id, recipient, or content";
-                send_response(res, socket);
-                return;
-            }
-
-            // Récupérer sender_id directement depuis la requête JSON
-            int sender_id = json::value_to<int>(parsed_body.at("sender_id"));
-            int recipient_id = json::value_to<int>(parsed_body.at("recipient"));
-            std::string content = json::value_to<std::string>(parsed_body.at("content"));
-
-            if (db_->sendMessage(sender_id, recipient_id, content)) {
-                res.result(http::status::ok);
-                res.body() = "Message sent successfully";
-            } else {
-                res.result(http::status::internal_server_error);
-                res.body() = "Failed to send message";
-            }
-
-            send_response(res, socket);
-            std::cout << "-------------------- Fin d'envoi de message --------------------" << std::endl;
+            MessageHandler::handle_send_message(parsed_body, res, db_);
         }
         else if (req.target() == "/get_messages") {
             std::cout << "getMessages appelé" << std::endl;

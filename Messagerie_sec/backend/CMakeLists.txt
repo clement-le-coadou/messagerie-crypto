@@ -28,6 +28,7 @@ add_executable(backend
     src/crypto.cpp
     src/database.cpp
     src/utils.cpp
+    src/message_handler.cpp
 )
 
 # Ajouter les répertoires d'inclusion

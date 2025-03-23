@@ -9,6 +9,7 @@
 #include <vector>
 #include <set>
 #include "database.h"
+#include "message_handler.h"
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
