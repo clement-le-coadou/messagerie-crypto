@@ -29,6 +29,8 @@ add_executable(backend
     src/database.cpp
     src/utils.cpp
     src/message_handler.cpp
+    src/message_getter.cpp
+    src/response_sender.cpp
 )
 
 # Ajouter les répertoires d'inclusion

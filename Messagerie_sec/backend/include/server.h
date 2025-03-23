@@ -10,6 +10,8 @@
 #include <set>
 #include "database.h"
 #include "message_handler.h"
+#include "message_getter.h"
+#include "response_sender.h"
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;

@@ -84,7 +84,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
     } catch (const std::exception& e) {
         res.result(http::status::bad_request);
         res.body() = "Invalid JSON format";
-        send_response(res, socket);
+        ResponseSender::send_response(res, socket);
         return;
     }
 
@@ -92,7 +92,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
     if (req.target() != "/login" && req.find(http::field::authorization) == req.end() && req.target() != "/register") {
         res.result(http::status::unauthorized);
         res.body() = "Authorization required";
-        send_response(res, socket);
+        ResponseSender::send_response(res, socket);
         return;
     }
 
@@ -105,7 +105,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
         if (user_id == -1) {
             res.result(http::status::unauthorized);
             res.body() = "Invalid or expired token";
-            send_response(res, socket);
+            ResponseSender::send_response(res, socket);
             return;
         }
     }
@@ -115,33 +115,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             MessageHandler::handle_send_message(parsed_body, res, db_);
         }
         else if (req.target() == "/get_messages") {
-            std::cout << "getMessages appelé" << std::endl;
-        
-            if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("contact_id")) {
-                res.result(http::status::bad_request);
-                res.body() = "Missing user_id or contact_id";
-                send_response(res, socket);
-                return;
-            }
-        
-            int user_id = json::value_to<int>(parsed_body.at("user_id"));
-            int contact_id = json::value_to<int>(parsed_body.at("contact_id"));
-        
-            auto messages = db_->getMessages(user_id, contact_id); // Nouvelle version de getMessages
-            json::array json_messages;
-        
-            for (const auto& msg : messages) {
-                json::object message;
-                message["sender"] = msg.sender_id;
-                message["content"] = msg.content;
-                json_messages.push_back(message);
-            }
-        
-            std::cout << "Messages retrieved: " << json::serialize(json_messages) << std::endl;
-        
-            res.result(http::status::ok);
-            res.set(http::field::content_type, "application/json");
-            res.body() = json::serialize(json_messages);
+            handle_get_messages(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/get_contacts") {
             std::cout << "getContacts appelé" << std::endl;
@@ -149,7 +123,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             if (!parsed_body.as_object().contains("user_id")) {
                 res.result(http::status::bad_request);
                 res.body() = "Missing user_id";
-                send_response(res, socket);
+                ResponseSender::send_response(res, socket);
                 return;
             }
         
@@ -176,7 +150,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("public_key")) {
                 res.result(http::status::bad_request);
                 res.body() = "Missing user_id or public_key";
-                send_response(res, socket);
+                ResponseSender::send_response(res, socket);
                 return;
             }
         
@@ -197,7 +171,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("request_id") || !parsed_body.as_object().contains("accept")) {
                 res.result(http::status::bad_request);
                 res.body() = "Missing user_id, request_id, or accept field";
-                send_response(res, socket);
+                ResponseSender::send_response(res, socket);
                 return;
             }
             
@@ -224,7 +198,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
                 }
             }
             
-            send_response(res, socket);
+            ResponseSender::send_response(res, socket);
         }
         else if (req.target() == "/get_contact_requests") {
             std::cout << "Fetching contact requests..." << std::endl;
@@ -233,7 +207,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             if (!parsed_body.as_object().contains("user_id")) {
                 res.result(http::status::bad_request);
                 res.body() = "Missing user_id";
-                send_response(res, socket);
+                ResponseSender::send_response(res, socket);
                 return;
             }
         
@@ -315,21 +289,5 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
         res.result(http::status::method_not_allowed);
         res.body() = "Method not allowed";
     }
-    send_response(res, socket);
-}
-
-
-void Server::send_response(const http::response<http::string_body>& res, asio::ip::tcp::socket& socket) {
-    std::cout << "Sending response: " << res.body() << std::endl;
-    beast::error_code ec;
-    http::write(socket, res, ec);
-    
-    if (ec) {
-        std::cerr << "Error writing to socket: " << ec.message() << std::endl;
-    }
-
-    socket.shutdown(asio::ip::tcp::socket::shutdown_send, ec);
-    if (ec) {
-        std::cerr << "Error shutting down socket: " << ec.message() << std::endl;
-    }
+    ResponseSender::send_response(res, socket);
 }
