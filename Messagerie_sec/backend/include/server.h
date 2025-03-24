@@ -12,6 +12,7 @@
 #include "message_handler.h"
 #include "message_getter.h"
 #include "response_sender.h"
+#include "contact_handler.h"
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;

@@ -118,31 +118,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             handle_get_messages(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/get_contacts") {
-            std::cout << "getContacts appelé" << std::endl;
-        
-            if (!parsed_body.as_object().contains("user_id")) {
-                res.result(http::status::bad_request);
-                res.body() = "Missing user_id";
-                ResponseSender::send_response(res, socket);
-                return;
-            }
-        
-            int user_id = std::stoi(json::value_to<std::string>(parsed_body.at("user_id")));
-            auto contacts = db_->getUserContacts(user_id);
-            json::array json_contacts;
-        
-            for (const auto& contact : contacts) {
-                json::object obj;
-                obj["id"] = contact.first;
-                obj["username"] = contact.second;
-                json_contacts.push_back(obj);
-            }
-        
-            std::cout << "Contacts retrieved: " << json::serialize(json_contacts) << std::endl;
-        
-            res.result(http::status::ok);
-            res.set(http::field::content_type, "application/json");
-            res.body() = json::serialize(json_contacts);
+            ContactHandler::handle_get_contacts(parsed_body, res, db_.get(), socket);
         }
         else if (req.target() == "/send_contact_request") {
             std::cout << "Envoi d'une demande de contact..." << std::endl;
