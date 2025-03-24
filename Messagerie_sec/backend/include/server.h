@@ -16,6 +16,8 @@
 #include "send_contact_request_handler.h"
 #include "handle_request_handler.h"
 #include "get_contact_requests_handler.h"
+#include "login_handler.h"
+#include "register_handler.h"
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;

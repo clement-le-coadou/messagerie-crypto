@@ -35,6 +35,8 @@ add_executable(backend
     src/send_contact_request_handler.cpp
     src/handle_request_handler.cpp
     src/get_contact_requests_handler.cpp
+    src/login_handler.cpp
+    src/register_handler.cpp
 )
 
 # Ajouter les répertoires d'inclusion

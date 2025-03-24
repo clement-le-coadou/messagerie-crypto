@@ -130,52 +130,10 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             GetContactRequestsHandler::handle_get_contact_requests(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/login") {
-            std::string username = json::value_to<std::string>(parsed_body.at("username"));
-            std::string password = json::value_to<std::string>(parsed_body.at("password"));
-            int user_id = db_->getUserId(username, password);
-            std::string public_key = db_->getUserPublicKey(user_id);
-
-            if (db_->validateUser(username, password)) {
-                // Create JWT token on successful login
-                auto token = jwt::create()
-                    .set_issuer("SecureMessenger")
-                    .set_type("JWT")
-                    .set_payload_claim("sender_id", jwt::claim(std::to_string(user_id))) // Sender's user ID here
-                    .set_payload_claim("public_key", jwt::claim(public_key))
-                    .sign(jwt::algorithm::hs256{"your_secret_key"});
-
-            // Création de la réponse JSON
-            json::object response_json;
-            response_json["token"] = token;
-            response_json["user_id"] = user_id; // On renvoie user_id
-            response_json["public_key"] = public_key;
-
-        std::string response_body = json::serialize(response_json);
-
-        // Envoi de la réponse
-        res.result(http::status::ok);
-        res.set(http::field::content_type, "application/json");
-        res.body() = response_body;
-        res.prepare_payload();
-                std::cout << "Generated Token: " << token << std::endl;
-
-            } else {
-                res.result(http::status::unauthorized);
-                res.body() = "Invalid username or password";
-            }
+            LoginHandler::handle_login(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/register") {
-            std::string username = json::value_to<std::string>(parsed_body.at("username"));
-            std::string password = json::value_to<std::string>(parsed_body.at("password"));
-            std::string publicKey = json::value_to<std::string>(parsed_body.at("publicKey"));
-
-            if (db_->addUser(username, password, publicKey)) {
-                res.result(http::status::ok);
-                res.body() = "User registered successfully";
-            } else {
-                res.result(http::status::internal_server_error);
-                res.body() = "Failed to register user";
-            }
+            RegisterHandler::handle_register(parsed_body, res, db_, socket);
         }
         else {
             res.result(http::status::not_found);
