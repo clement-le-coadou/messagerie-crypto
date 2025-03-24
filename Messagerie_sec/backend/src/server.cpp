@@ -121,92 +121,13 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             ContactHandler::handle_get_contacts(parsed_body, res, db_.get(), socket);
         }
         else if (req.target() == "/send_contact_request") {
-            std::cout << "Envoi d'une demande de contact..." << std::endl;
-        
-            if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("public_key")) {
-                res.result(http::status::bad_request);
-                res.body() = "Missing user_id or public_key";
-                ResponseSender::send_response(res, socket);
-                return;
-            }
-        
-            int user_id = json::value_to<int>(parsed_body.at("user_id"));
-            std::string public_key = json::value_to<std::string>(parsed_body.at("public_key"));
-        
-            if (db_->sendContactRequest(user_id, public_key)) {
-                res.result(http::status::ok);
-                res.body() = "Contact request sent successfully";
-            } else {
-                res.result(http::status::internal_server_error);
-                res.body() = "Failed to send contact request";
-            }
+            SendContactRequestHandler::handle_send_contact_request(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/handle_request") {
-            std::cout << "Handling contact request..." << std::endl;
-            
-            if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("request_id") || !parsed_body.as_object().contains("accept")) {
-                res.result(http::status::bad_request);
-                res.body() = "Missing user_id, request_id, or accept field";
-                ResponseSender::send_response(res, socket);
-                return;
-            }
-            
-            int user_id = json::value_to<int>(parsed_body.at("user_id"));
-            int request_id = json::value_to<int>(parsed_body.at("request_id"));
-            bool accept = json::value_to<bool>(parsed_body.at("accept"));
-            
-            // Logique pour accepter ou refuser la demande de contact
-            if (accept) {
-                if (db_->acceptContactRequest(user_id, request_id)) {
-                    res.result(http::status::ok);
-                    res.body() = "Contact request accepted";
-                } else {
-                    res.result(http::status::internal_server_error);
-                    res.body() = "Failed to accept contact request";
-                }
-            } else {
-                if (db_->rejectContactRequest(user_id, request_id)) {
-                    res.result(http::status::ok);
-                    res.body() = "Contact request rejected";
-                } else {
-                    res.result(http::status::internal_server_error);
-                    res.body() = "Failed to reject contact request";
-                }
-            }
-            
-            ResponseSender::send_response(res, socket);
+            HandleRequestHandler::handle_contact_request(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/get_contact_requests") {
-            std::cout << "Fetching contact requests..." << std::endl;
-        
-            // Vérifier la présence de user_id dans la requête JSON
-            if (!parsed_body.as_object().contains("user_id")) {
-                res.result(http::status::bad_request);
-                res.body() = "Missing user_id";
-                ResponseSender::send_response(res, socket);
-                return;
-            }
-        
-            // Récupérer le user_id depuis la requête
-            int user_id = json::value_to<int>(parsed_body.at("user_id"));
-        
-            // Récupérer les demandes de contact en attente depuis la base de données
-            auto requests = db_->getContactRequests(user_id);
-            json::array json_requests;
-        
-            for (const auto& request : requests) {
-                json::object request_obj;
-                request_obj["id"] = request.id;
-                request_obj["username"] = request.username;
-                json_requests.push_back(request_obj);
-            }
-        
-            std::cout << "Contact requests: " << json::serialize(json_requests) << std::endl;
-        
-            // Répondre avec les demandes de contact
-            res.result(http::status::ok);
-            res.set(http::field::content_type, "application/json");
-            res.body() = json::serialize(json_requests);
+            GetContactRequestsHandler::handle_get_contact_requests(parsed_body, res, db_, socket);
         }
         else if (req.target() == "/login") {
             std::string username = json::value_to<std::string>(parsed_body.at("username"));
