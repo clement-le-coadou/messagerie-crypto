@@ -3,13 +3,13 @@
 
 using boost::asio::ip::tcp;
 
-void ContactHandler::handle_get_contacts(const json::value& parsed_body, http::response<http::string_body>& res, Database* db_, tcp::socket& socket) {
+void ContactHandler::handle_get_contacts(const json::value& parsed_body, http::response<http::string_body>& res, Database* db_, std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) {
     std::cout << "getContacts appelé" << std::endl;
 
     if (!parsed_body.as_object().contains("user_id")) {
         res.result(http::status::bad_request);
         res.body() = "Missing user_id";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -29,5 +29,5 @@ void ContactHandler::handle_get_contacts(const json::value& parsed_body, http::r
     res.result(http::status::ok);
     res.set(http::field::content_type, "application/json");
     res.body() = json::serialize(json_contacts);
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }

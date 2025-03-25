@@ -1,7 +1,7 @@
 #include "register_handler.h"
 #include <iostream>
 
-void RegisterHandler::handle_register(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, boost::asio::ip::tcp::socket& socket) {
+void RegisterHandler::handle_register(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) {
     std::cout << "Processing registration..." << std::endl;
 
     // Vérifier la présence des champs nécessaires
@@ -11,7 +11,7 @@ void RegisterHandler::handle_register(const json::value& parsed_body, http::resp
         
         res.result(http::status::bad_request);
         res.body() = "Missing username, password, or publicKey";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -29,5 +29,5 @@ void RegisterHandler::handle_register(const json::value& parsed_body, http::resp
         res.body() = "Failed to register user";
     }
 
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }

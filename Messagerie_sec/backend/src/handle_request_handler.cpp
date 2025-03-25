@@ -1,7 +1,9 @@
 #include "handle_request_handler.h"
 #include <iostream>
 
-void HandleRequestHandler::handle_contact_request(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, boost::asio::ip::tcp::socket& socket) {
+void HandleRequestHandler::handle_contact_request(const json::value& parsed_body, http::response<http::string_body>& res, 
+                                                  std::shared_ptr<Database> db_, 
+                                                  std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) {
     std::cout << "Handling contact request..." << std::endl;
 
     if (!parsed_body.as_object().contains("user_id") || 
@@ -10,7 +12,7 @@ void HandleRequestHandler::handle_contact_request(const json::value& parsed_body
         
         res.result(http::status::bad_request);
         res.body() = "Missing user_id, request_id, or accept field";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -36,5 +38,5 @@ void HandleRequestHandler::handle_contact_request(const json::value& parsed_body
         }
     }
 
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }

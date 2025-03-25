@@ -5,6 +5,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
 #include <jwt-cpp/jwt.h> // Include JWT-cpp
+#include <boost/asio/ssl.hpp>
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
@@ -13,8 +14,21 @@ namespace json = boost::json;
 
 Server::Server(unsigned short port)
     : acceptor_(ioc, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
-      db_(std::make_shared<Database>("dbname=secure_messenger user=postgres password=cytech0001 host=localhost port=5432")) {
-    std::cout << "Server started on port " << port << std::endl;
+    ssl_context_(asio::ssl::context::tlsv12), // Ajout du contexte SSL
+    db_(std::make_shared<Database>("dbname=secure_messenger user=postgres password=cytech0001 host=localhost port=5432")) {
+
+    // Charger les certificats et clés
+    ssl_context_.set_options(
+    asio::ssl::context::default_workarounds |
+    asio::ssl::context::no_sslv2 |
+    asio::ssl::context::no_sslv3 |
+    asio::ssl::context::single_dh_use);
+
+    ssl_context_.use_certificate_chain_file("H:/Pascal/VisualCodeProjects/JavaScriptWorkspace/SecureMessagingApp/messagerie-crypto/Messagerie_sec/backend/certs/server.crt");
+    ssl_context_.use_private_key_file("H:/Pascal/VisualCodeProjects/JavaScriptWorkspace/SecureMessagingApp/messagerie-crypto/Messagerie_sec/backend/certs/server.key", asio::ssl::context::pem);
+    ssl_context_.use_tmp_dh_file("H:/Pascal/VisualCodeProjects/JavaScriptWorkspace/SecureMessagingApp/messagerie-crypto/Messagerie_sec/backend/certs/dh2048.pem");
+
+    std::cout << "Secure server started on port " << port << std::endl;
 }
 
 void Server::run() {
@@ -22,27 +36,45 @@ void Server::run() {
     ioc.run();
 }
 
+void Server::handle_session(std::shared_ptr<asio::ssl::stream<asio::ip::tcp::socket>> ssl_socket) {
+    auto self = shared_from_this(); // Si Server est un `std::enable_shared_from_this<Server>`
+
+    beast::flat_buffer buffer;
+    auto req = std::make_shared<http::request<http::string_body>>();
+
+    // Lire la requête HTTP sur le socket SSL
+    http::async_read(*ssl_socket, buffer, *req,
+        [this, self, ssl_socket, req](beast::error_code ec, std::size_t bytes_transferred) {
+            if (!ec) {
+                std::cout << "Received HTTPS request:\n" << *req << std::endl;
+                handle_request(*req, ssl_socket);
+            } else {
+                std::cerr << "Read error: " << ec.message() << std::endl;
+            }
+        });
+}
+
+
 void Server::do_accept() {
     acceptor_.async_accept(
         [this](beast::error_code ec, asio::ip::tcp::socket socket) {
-            try {
-                if (ec) {
-                    throw std::runtime_error("Error: " + ec.message());
-                }
-
-                std::cout << "Client connected: " << socket.remote_endpoint() << std::endl;
-
-                beast::flat_buffer buffer;
-                http::request<http::string_body> req;
-
-                http::read(socket, buffer, req);
-                std::cout << "Received HTTP request:\n" << req << std::endl;
-
-                handle_request(req, socket);
-            } catch (const std::exception& e) {
-                std::cerr << "Exception occurred: " << e.what() << std::endl;
+            if (ec) {
+                std::cerr << "Accept failed: " << ec.message() << std::endl;
+                return;
             }
-            do_accept();
+
+            // Création d'un stream SSL
+            auto ssl_socket = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(std::move(socket), ssl_context_);
+            
+            // Lancer la négociation TLS
+            ssl_socket->async_handshake(asio::ssl::stream_base::server,
+                [this, ssl_socket](beast::error_code ec) {
+                    if (!ec) {
+                        handle_session(ssl_socket);
+                    } else {
+                        std::cerr << "TLS handshake failed: " << ec.message() << std::endl;
+                    }
+                });
         });
 }
 
@@ -71,7 +103,7 @@ int Server::validate_jwt_token(const std::string& token) {
 }
 
 
-void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp::socket& socket) {
+void Server::handle_request(http::request<http::string_body> req, std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) {
     http::response<http::string_body> res;
     json::value parsed_body;
     std::string token;
@@ -84,7 +116,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
     } catch (const std::exception& e) {
         res.result(http::status::bad_request);
         res.body() = "Invalid JSON format";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -92,7 +124,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
     if (req.target() != "/login" && req.find(http::field::authorization) == req.end() && req.target() != "/register") {
         res.result(http::status::unauthorized);
         res.body() = "Authorization required";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -105,7 +137,7 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
         if (user_id == -1) {
             res.result(http::status::unauthorized);
             res.body() = "Invalid or expired token";
-            ResponseSender::send_response(res, socket);
+            ResponseSender::send_response(res, ssl_socket);
             return;
         }
     }
@@ -115,25 +147,25 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
             MessageHandler::handle_send_message(parsed_body, res, db_);
         }
         else if (req.target() == "/get_messages") {
-            handle_get_messages(parsed_body, res, db_, socket);
+            handle_get_messages(parsed_body, res, db_, ssl_socket);
         }
         else if (req.target() == "/get_contacts") {
-            ContactHandler::handle_get_contacts(parsed_body, res, db_.get(), socket);
+            ContactHandler::handle_get_contacts(parsed_body, res, db_.get(), ssl_socket);
         }
         else if (req.target() == "/send_contact_request") {
-            SendContactRequestHandler::handle_send_contact_request(parsed_body, res, db_, socket);
+            SendContactRequestHandler::handle_send_contact_request(parsed_body, res, db_, ssl_socket);
         }
         else if (req.target() == "/handle_request") {
-            HandleRequestHandler::handle_contact_request(parsed_body, res, db_, socket);
+            HandleRequestHandler::handle_contact_request(parsed_body, res, db_, ssl_socket);
         }
         else if (req.target() == "/get_contact_requests") {
-            GetContactRequestsHandler::handle_get_contact_requests(parsed_body, res, db_, socket);
+            GetContactRequestsHandler::handle_get_contact_requests(parsed_body, res, db_, ssl_socket);
         }
         else if (req.target() == "/login") {
-            LoginHandler::handle_login(parsed_body, res, db_, socket);
+            LoginHandler::handle_login(parsed_body, res, db_, ssl_socket);
         }
         else if (req.target() == "/register") {
-            RegisterHandler::handle_register(parsed_body, res, db_, socket);
+            RegisterHandler::handle_register(parsed_body, res, db_, ssl_socket);
         }
         else {
             res.result(http::status::not_found);
@@ -144,5 +176,5 @@ void Server::handle_request(http::request<http::string_body> req, asio::ip::tcp:
         res.result(http::status::method_not_allowed);
         res.body() = "Method not allowed";
     }
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }

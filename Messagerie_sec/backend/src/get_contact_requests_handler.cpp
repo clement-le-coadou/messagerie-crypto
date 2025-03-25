@@ -1,13 +1,13 @@
 #include "get_contact_requests_handler.h"
 #include <iostream>
 
-void GetContactRequestsHandler::handle_get_contact_requests(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, boost::asio::ip::tcp::socket& socket) {
+void GetContactRequestsHandler::handle_get_contact_requests(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) {
     std::cout << "Fetching contact requests..." << std::endl;
 
     if (!parsed_body.as_object().contains("user_id")) {
         res.result(http::status::bad_request);
         res.body() = "Missing user_id";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -28,5 +28,5 @@ void GetContactRequestsHandler::handle_get_contact_requests(const json::value& p
     res.set(http::field::content_type, "application/json");
     res.body() = json::serialize(json_requests);
     
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }

@@ -8,7 +8,7 @@ void handle_get_messages(
     const boost::json::value& parsed_body,
     boost::beast::http::response<boost::beast::http::string_body>& res,
     std::shared_ptr<Database> db_,
-    boost::asio::ip::tcp::socket& socket) 
+    std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) 
 {
     std::cout << "getMessages appelé" << std::endl;
 
@@ -16,7 +16,7 @@ void handle_get_messages(
     if (!parsed_body.as_object().contains("user_id") || !parsed_body.as_object().contains("contact_id")) {
         res.result(boost::beast::http::status::bad_request);
         res.body() = "Missing user_id or contact_id";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -44,5 +44,5 @@ void handle_get_messages(
     res.body() = boost::json::serialize(json_messages);
 
     // Envoyer la réponse au client
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }

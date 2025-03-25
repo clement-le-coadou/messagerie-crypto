@@ -1,14 +1,14 @@
 #include "login_handler.h"
 #include <iostream>
 
-void LoginHandler::handle_login(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, boost::asio::ip::tcp::socket& socket) {
+void LoginHandler::handle_login(const json::value& parsed_body, http::response<http::string_body>& res, std::shared_ptr<Database> db_, std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> ssl_socket) {
     std::cout << "Processing login..." << std::endl;
 
     // Vérifier la présence des champs nécessaires
     if (!parsed_body.as_object().contains("username") || !parsed_body.as_object().contains("password")) {
         res.result(http::status::bad_request);
         res.body() = "Missing username or password";
-        ResponseSender::send_response(res, socket);
+        ResponseSender::send_response(res, ssl_socket);
         return;
     }
 
@@ -48,5 +48,5 @@ void LoginHandler::handle_login(const json::value& parsed_body, http::response<h
         res.body() = "Invalid username or password";
     }
 
-    ResponseSender::send_response(res, socket);
+    ResponseSender::send_response(res, ssl_socket);
 }
