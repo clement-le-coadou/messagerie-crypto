@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Utiliser vcpkg
-set(CMAKE_TOOLCHAIN_FILE "H:/Run/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file" FORCE)
+set(CMAKE_TOOLCHAIN_FILE "H:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file" FORCE)
 
 # Nom du projet
 project(SecureMessenger)
@@ -37,7 +37,7 @@ target_include_directories(backend PRIVATE
     ${Boost_INCLUDE_DIRS} 
     ${PostgreSQL_INCLUDE_DIRS} 
     ${libpqxx_INCLUDE_DIRS}
-    "H:/Run/vcpkg/installed/x64-windows/include"  # 📌 Ajout des headers vcpkg
+    "H:/vcpkg/installed/x64-windows/include"  # 📌 Ajout des headers vcpkg
 )
 
 # Lier les bibliothèques nécessaires
