@@ -8,6 +8,6 @@ Messagerie_sec/backend/CMakeUserPresets.json
 Messagerie_sec/backend/CMakeLists.txt
 Messagerie_sec/backend/CMakeUserPresets.json
 Messagerie_sec/frontend/node_modules/
-.vscode/
 .vscode
 Messagerie_sec/backend/vcpkg_installed
+.vscode/settings.json
