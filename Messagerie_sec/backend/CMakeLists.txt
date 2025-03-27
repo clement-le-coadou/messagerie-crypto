@@ -28,6 +28,15 @@ add_executable(backend
     src/crypto.cpp
     src/database.cpp
     src/utils.cpp
+    src/message_handler.cpp
+    src/message_getter.cpp
+    src/response_sender.cpp
+    src/contact_handler.cpp
+    src/send_contact_request_handler.cpp
+    src/handle_request_handler.cpp
+    src/get_contact_requests_handler.cpp
+    src/login_handler.cpp
+    src/register_handler.cpp
 )
 
 # Ajouter les répertoires d'inclusion
@@ -37,7 +46,7 @@ target_include_directories(backend PRIVATE
     ${Boost_INCLUDE_DIRS} 
     ${PostgreSQL_INCLUDE_DIRS} 
     ${libpqxx_INCLUDE_DIRS}
-    "H:/Run/vcpkg/installed/x64-windows/include"  # 📌 Ajout des headers vcpkg
+    "H:/Run/vcpkg/installed/x64-windows/include"
 )
 
 # Lier les bibliothèques nécessaires
