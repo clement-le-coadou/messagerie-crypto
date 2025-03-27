@@ -8,6 +8,6 @@ Messagerie_sec/backend/CMakeUserPresets.json
 Messagerie_sec/backend/CMakeLists.txt
 Messagerie_sec/backend/CMakeUserPresets.json
 Messagerie_sec/frontend/node_modules/
-messagerie-crypto/.vscode
+messagerie-crypto/.vscode/
 .vscode
 Messagerie_sec/backend/vcpkg_installed
