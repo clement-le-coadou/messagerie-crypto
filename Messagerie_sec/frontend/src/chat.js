@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetch("http://localhost:8080/get_contacts", {
+        fetch("https://localhost:8080/get_contacts", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetch("http://localhost:8080/get_messages", {
+        fetch("https://localhost:8080/get_messages", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             content
         };
 
-        fetch("http://localhost:8080/send_message", {
+        fetch("https://localhost:8080/send_message", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

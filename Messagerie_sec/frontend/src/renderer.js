@@ -17,7 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value;
         const publicKey = document.getElementById('publicKey').value;
 
-        window.electron.post('http://localhost:8080/register', {
+        // Log des données envoyées pour l'inscription
+        console.log('Envoi des données pour l\'inscription:', {
+            username: username,
+            password: password,
+            publicKey: publicKey
+        });
+
+        window.electron.post('https://localhost:8080/register', {
             username: username,
             password: password,
             publicKey: publicKey
@@ -27,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .then(response => {
+            console.log('Réponse du serveur pour l\'inscription:', response);
             alert('Utilisateur enregistré avec succès !');
         })
         .catch(error => {
@@ -37,11 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fonction pour se connecter
     document.getElementById('loginForm').addEventListener('submit', (event) => {
         event.preventDefault();
-    
+
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
-    
-        window.electron.post('http://localhost:8080/login', {
+
+        // Log des données envoyées pour la connexion
+        console.log('Envoi des données pour la connexion:', {
+            username: username,
+            password: password
+        });
+
+        window.electron.post('https://localhost:8080/login', {
             username: username,
             password: password
         }, {
@@ -50,11 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .then(data => {  // `data` est directement la réponse JSON
-            console.log("Réponse du serveur:", data);
+            console.log("Réponse du serveur pour la connexion:", data);
             console.log("token",data.data.token);
             console.log('userId',data.data.user_id);
             console.log("pb",data.data.public_key);
-    
+
             if (data) {
                 localStorage.setItem('jwtToken', data.data.token); // Stocker le JWT
                 localStorage.setItem('username', username); // Stocker le username
@@ -70,7 +84,4 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Erreur lors de la connexion !", error);
         });
     });
-    
-
-
 });

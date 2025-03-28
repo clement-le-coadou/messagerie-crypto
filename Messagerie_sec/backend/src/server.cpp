@@ -6,6 +6,7 @@
 #include <pqxx/pqxx>
 #include <jwt-cpp/jwt.h> // Include JWT-cpp
 #include <boost/asio/ssl.hpp>
+#include <fstream>
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
@@ -37,45 +38,78 @@ void Server::run() {
 }
 
 void Server::handle_session(std::shared_ptr<asio::ssl::stream<asio::ip::tcp::socket>> ssl_socket) {
-    auto self = shared_from_this(); // Si Server est un `std::enable_shared_from_this<Server>`
-
     beast::flat_buffer buffer;
     auto req = std::make_shared<http::request<http::string_body>>();
 
-    // Lire la requête HTTP sur le socket SSL
-    http::async_read(*ssl_socket, buffer, *req,
-        [this, self, ssl_socket, req](beast::error_code ec, std::size_t bytes_transferred) {
-            if (!ec) {
-                std::cout << "Received HTTPS request:\n" << *req << std::endl;
-                handle_request(*req, ssl_socket);
-            } else {
-                std::cerr << "Read error: " << ec.message() << std::endl;
-            }
-        });
+    try {
+        std::cout << "[Server] Starting to read HTTPS request..." << std::endl;
+        std::cout << "Buffer size in the beginning : " << buffer.size() << " bytes" << std::endl;
+
+        http::async_read(*ssl_socket, buffer, *req,
+            [this, ssl_socket, req, &buffer](beast::error_code ec, std::size_t bytes_transferred) {
+                std::cout << "Buffer size: " << buffer.size() << " bytes" << std::endl;
+                if (!ec) {
+                    std::cout << "[Server] Received HTTPS request:" << std::endl;
+                    std::cout << "Method: " << req->method_string() << std::endl;
+                    std::cout << "Target: " << req->target() << std::endl;
+                    std::cout << "Headers: " << req->base() << std::endl;
+
+                    // Log the content of the buffer
+                    std::string buffer_content = beast::buffers_to_string(buffer.data());
+                    std::cout << "[Server] Buffer Content: " << buffer_content << std::endl;
+
+                    std::cout << "Body: " << req->body() << std::endl;
+
+                    handle_request(*req, ssl_socket);
+                } else {
+                    std::cerr << "[Server] Read error: " << ec.message() << std::endl;
+                    std::cerr << "[Server] Error code: " << ec.value() << std::endl;
+                    std::cerr << "[Server] Error category: " << ec.category().name() << std::endl;
+                    std::ofstream raw_data_file("raw_data.txt", std::ios::binary);
+                    if (raw_data_file.is_open()) {
+                        raw_data_file.write(reinterpret_cast<const char*>(buffer.data().data()), buffer.size());
+                        raw_data_file.close();
+                    }
+                    std::cout << "[Server] Raw data written to raw_data.txt" << std::endl;
+                }
+            });
+
+        std::cout << "[Server] Finished reading HTTPS request, awaiting callback..." << std::endl;
+
+    } catch (const std::exception& e) {
+        std::cerr << "[Server] Exception caught: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "[Server] Unknown exception caught!" << std::endl;
+    }
 }
 
 
+
+
+
 void Server::do_accept() {
+    std::cout << "[Server] Waiting for new connection..." << std::endl;
+
     acceptor_.async_accept(
         [this](beast::error_code ec, asio::ip::tcp::socket socket) {
             if (ec) {
-                std::cerr << "Accept failed: " << ec.message() << std::endl;
-                return;
+                std::cerr << "[Server] Accept failed: " << ec.message() << std::endl;
+            } else {
+                std::cout << "[Server] New connection accepted" << std::endl;
+                auto ssl_socket = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(std::move(socket), ssl_context_);
+                ssl_socket->async_handshake(asio::ssl::stream_base::server,
+                    [this, ssl_socket](beast::error_code ec) {
+                        if (!ec) {
+                            std::cout << "[Server] TLS handshake successful" << std::endl;
+                            handle_session(ssl_socket);
+                        } else {
+                            std::cerr << "[Server] TLS handshake failed: " << ec.message() << std::endl;
+                        }
+                    });
             }
-
-            // Création d'un stream SSL
-            auto ssl_socket = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(std::move(socket), ssl_context_);
-            
-            // Lancer la négociation TLS
-            ssl_socket->async_handshake(asio::ssl::stream_base::server,
-                [this, ssl_socket](beast::error_code ec) {
-                    if (!ec) {
-                        handle_session(ssl_socket);
-                    } else {
-                        std::cerr << "TLS handshake failed: " << ec.message() << std::endl;
-                    }
-                });
-        });
+            do_accept();
+        }
+    );
 }
 
 // Fonction pour valider le JWT et extraire l'ID utilisateur
