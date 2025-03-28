@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Récupère la liste des contacts **/
     function fetchContacts() {
-        fetch("http://localhost:8080/get_contacts", {
+        fetch("https://localhost:8080/get_contacts", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Récupère la liste des demandes de contact en attente **/
     function fetchRequests() {
-        fetch("http://localhost:8080/get_contact_requests", {
+        fetch("https://localhost:8080/get_contact_requests", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Gère l'acceptation ou le refus d'une demande **/
     function handleRequest(requestId, accept) {
-        fetch("http://localhost:8080/handle_request", {
+        fetch("https://localhost:8080/handle_request", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Désactiver le bouton pour éviter les requêtes multiples
         addContactButton.disabled = true;
 
-        fetch("http://localhost:8080/send_contact_request", {
+        fetch("https://localhost:8080/send_contact_request", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
