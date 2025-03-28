@@ -39,42 +39,30 @@ void Server::run() {
 
 void Server::handle_session(std::shared_ptr<asio::ssl::stream<asio::ip::tcp::socket>> ssl_socket) {
     beast::flat_buffer buffer;
-    auto req = std::make_shared<http::request<http::string_body>>();
+    http::request<http::string_body> req;
 
     try {
         std::cout << "[Server] Starting to read HTTPS request..." << std::endl;
         std::cout << "Buffer size in the beginning : " << buffer.size() << " bytes" << std::endl;
 
-        http::async_read(*ssl_socket, buffer, *req,
-            [this, ssl_socket, req, &buffer](beast::error_code ec, std::size_t bytes_transferred) {
-                std::cout << "Buffer size: " << buffer.size() << " bytes" << std::endl;
-                if (!ec) {
-                    std::cout << "[Server] Received HTTPS request:" << std::endl;
-                    std::cout << "Method: " << req->method_string() << std::endl;
-                    std::cout << "Target: " << req->target() << std::endl;
-                    std::cout << "Headers: " << req->base() << std::endl;
+        // Lire la requête de manière synchrone
+        http::read(*ssl_socket, buffer, req);
 
-                    // Log the content of the buffer
-                    std::string buffer_content = beast::buffers_to_string(buffer.data());
-                    std::cout << "[Server] Buffer Content: " << buffer_content << std::endl;
+        // Affichage de la taille du buffer après la lecture
+        std::cout << "Buffer size after read: " << buffer.size() << " bytes" << std::endl;
 
-                    std::cout << "Body: " << req->body() << std::endl;
+        std::cout << "[Server] Received HTTPS request:" << std::endl;
+        std::cout << "Method: " << req.method_string() << std::endl;
+        std::cout << "Target: " << req.target() << std::endl;
+        std::cout << "Headers: " << req.base() << std::endl;
 
-                    handle_request(*req, ssl_socket);
-                } else {
-                    std::cerr << "[Server] Read error: " << ec.message() << std::endl;
-                    std::cerr << "[Server] Error code: " << ec.value() << std::endl;
-                    std::cerr << "[Server] Error category: " << ec.category().name() << std::endl;
-                    std::ofstream raw_data_file("raw_data.txt", std::ios::binary);
-                    if (raw_data_file.is_open()) {
-                        raw_data_file.write(reinterpret_cast<const char*>(buffer.data().data()), buffer.size());
-                        raw_data_file.close();
-                    }
-                    std::cout << "[Server] Raw data written to raw_data.txt" << std::endl;
-                }
-            });
+        // Log the content of the buffer
+        std::string buffer_content = beast::buffers_to_string(buffer.data());
+        std::cout << "[Server] Buffer Content: " << buffer_content << std::endl;
 
-        std::cout << "[Server] Finished reading HTTPS request, awaiting callback..." << std::endl;
+        std::cout << "Body: " << req.body() << std::endl;
+
+        handle_request(req, ssl_socket);
 
     } catch (const std::exception& e) {
         std::cerr << "[Server] Exception caught: " << e.what() << std::endl;
@@ -82,7 +70,6 @@ void Server::handle_session(std::shared_ptr<asio::ssl::stream<asio::ip::tcp::soc
         std::cerr << "[Server] Unknown exception caught!" << std::endl;
     }
 }
-
 
 
 
