@@ -7,3 +7,7 @@ Messagerie_sec/frontend/node_modules/
 .vscode
 Messagerie_sec/backend/vcpkg_installed
 .vscode/settings.json
+Messagerie_sec/backend/CMakeLists.txt
+Messagerie_sec/backend/CMakeLists.txt
+Messagerie_sec/backend/src/server.cpp
+Messagerie_sec/backend/CMakeLists.txt
