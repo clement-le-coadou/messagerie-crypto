@@ -20,6 +20,7 @@
 #include "register_handler.h"
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <filesystem>
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;

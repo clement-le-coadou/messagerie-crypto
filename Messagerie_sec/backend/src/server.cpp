@@ -7,11 +7,13 @@
 #include <jwt-cpp/jwt.h> // Include JWT-cpp
 #include <boost/asio/ssl.hpp>
 #include <fstream>
+#include <filesystem>
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
 namespace asio = boost::asio;
 namespace json = boost::json;
+namespace fs = std::filesystem;
 
 Server::Server(unsigned short port)
     : acceptor_(ioc, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
@@ -25,9 +27,12 @@ Server::Server(unsigned short port)
     asio::ssl::context::no_sslv3 |
     asio::ssl::context::single_dh_use);
 
-    ssl_context_.use_certificate_chain_file("H:/Pascal/VisualCodeProjects/JavaScriptWorkspace/SecureMessagingApp/messagerie-crypto/Messagerie_sec/backend/certs/server.crt");
-    ssl_context_.use_private_key_file("H:/Pascal/VisualCodeProjects/JavaScriptWorkspace/SecureMessagingApp/messagerie-crypto/Messagerie_sec/backend/certs/server.key", asio::ssl::context::pem);
-    ssl_context_.use_tmp_dh_file("H:/Pascal/VisualCodeProjects/JavaScriptWorkspace/SecureMessagingApp/messagerie-crypto/Messagerie_sec/backend/certs/dh2048.pem");
+    // Déterminer le chemin du dossier des certificats
+    fs::path certs_path = fs::current_path() / "certs";
+
+    ssl_context_.use_certificate_chain_file((certs_path / "server.crt").string());
+    ssl_context_.use_private_key_file((certs_path / "server.key").string(), asio::ssl::context::pem);
+    ssl_context_.use_tmp_dh_file((certs_path / "dh2048.pem").string());
 
     std::cout << "Secure server started on port " << port << std::endl;
 }
