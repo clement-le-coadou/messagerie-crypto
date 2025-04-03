@@ -167,5 +167,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedContactId) {
             fetchMessages(selectedContactId);
         }
-    }, 1000); // ⏳ 1 seconde pour éviter trop de requêtes
+    }, 1000);
 });
