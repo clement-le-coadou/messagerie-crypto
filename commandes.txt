@@ -1,7 +1,0 @@
-
-npm init -y  # Crée un fichier package.json
-npm install electron --save-dev  # Installe Electron
-
-
-
-npm install pg electron-store bcrypt
